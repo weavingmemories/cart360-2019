@@ -1,24 +1,36 @@
-const int pingPin = 2; // Trigger Pin of Ultrasonic Sensor
+       const int pingPin = 2; // Trigger Pin of Ultrasonic Sensor
 const int echoPin = 4; // Echo Pin of Ultrasonic Sensor
-#define LED_PIN_1 8 // LED pin 1
+
+// LED PINS
+#define LED_PIN_1 8
 #define LED_PIN_2 9
 #define LED_PIN_3 10
 #define LED_PIN_4 11
 #define LED_PIN_5 12
+
+// TOUCH SENSOR PIN
 #define TOUCH_PIN A0
 
-// For everything re: the random pin, I referenced:
-// https://www.learnrobotics.org/blog/random-led-generator-using-arduino-uno/
+// MAX IN ARRAY
+// col
+#define MAX_PATTERN 10
+// row
+//#define MAX_AMOUNT 5
 
 // random pin chose:
 
-const byte ledPins [] = {8,9,10,11,12};
+const byte ledPins [] = {8, 9, 10, 11, 12};
 byte ledPin;
 
-
-long duration, cm;
+// pattern array
+const byte pattern[MAX_PATTERN];
+// counter for how many pattern entries we have
+int countPattern =0;
+// counter for how many rows we have been through
+//int countAmount =0;
 
 // timer
+long duration, cm;
 unsigned long startTime;
 unsigned long timePassed;
 
@@ -36,109 +48,85 @@ void setup() {
 }
 
 void loop() {
-timePassed = millis() - startTime;
- Serial.println(timePassed);
-calcDistance();
-detectPresence();
-checkTouch();
+  timePassed = millis() - startTime;
+  Serial.println(timePassed);
+  calcDistance();
+  detectPresence();
+  checkTouch();
 }
 
 void calcDistance() {
-     
-   pinMode(pingPin, OUTPUT);
-   digitalWrite(pingPin, LOW);
-   delayMicroseconds(2);
-   digitalWrite(pingPin, HIGH);
-   delayMicroseconds(10);
-   digitalWrite(pingPin, LOW);
-   pinMode(echoPin, INPUT);
-   duration = pulseIn(echoPin, HIGH);
-   cm = microsecondsToCentimeters(duration);
-   Serial.print(cm);
-   Serial.print("cm");
-   Serial.println();
-   delay(100);
+
+  pinMode(pingPin, OUTPUT);
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(pingPin, LOW);
+  pinMode(echoPin, INPUT);
+  duration = pulseIn(echoPin, HIGH);
+  cm = microsecondsToCentimeters(duration);
+ // Serial.print(cm);
+ // Serial.print("cm");
+ // Serial.println();
+  delay(100);
 }
 
 long microsecondsToCentimeters(long microseconds) {
-   return microseconds / 29 / 2;
+  return microseconds / 29 / 2;
 }
 
 void detectPresence() {
   if (cm <= 30 && timePassed >= 3000) {
 
     if (hasAlreadyArrived == false) {
-      startPattern();
-      timePassed =0;
+    //  startPattern();
+  //  Serial.println("Start");
+      timePassed = 0;
       startTime = millis();
     }
 
     Serial.println("arrived");
     hasAlreadyArrived = true;
-    timePassed= 0;
+    timePassed = 0;
     startTime = millis();
   }
 
   if (cm >= 30 && timePassed >= 5000) {
-    digitalWrite(LED_PIN,LOW);
-    Serial.println("left");
+  //  Serial.println("left");
     hasAlreadyArrived = false;
-    timePassed =0;
+    timePassed = 0;
     startTime = millis();
   }
 
 }
 
 void checkTouch() {
-  
-  pinValue = analogRead(THEPIN);
+
+  int pinValue = analogRead(TOUCH_PIN);
   Serial.println(pinValue);
 
- if (pinValue >= 900 ) {
+  if (pinValue >= 900 ) {
 
-  // This is where you pick random led
-  ledPin = ledPins [random(0,6)];
-  
-  digitalWrite(LED_PIN, HIGH);
-    
-  } else {
-    digitalWrite(LED_PIN, LOW);
+    // This is where you pick random led
+   // ledPin = ledPins [random(0, 6)];
+   // Serial.println(ledPin);
+  //  digitalWrite(ledPin, HIGH);
+  digitalWrite(LED_PIN_1,HIGH);
+    // Now, add to array
+     // if (countPattern < MAX_PATTERN) {
+     // pattern[countPattern] = ledPin;
+    //  countPattern++;
+     // Serial.println(countPattern);
+      } else {
+    digitalWrite(ledPin, LOW);
   }
+
 }
 
 void startPattern() {
-  digitalWrite(LED_PIN_1,HIGH);
-  digitalWrite(LED_PIN_2,HIGH);
-  digitalWrite(LED_PIN_3,HIGH);
-  digitalWrite(LED_PIN_4,HIGH);
-  digitalWrite(LED_PIN_5,HIGH);
+  digitalWrite(LED_PIN_1, HIGH);
   delay(1000);
-  digitalWrite(LED_PIN_1,LOW);
-  digitalWrite(LED_PIN_2,LOW);
-  digitalWrite(LED_PIN_3,LOW);
-  digitalWrite(LED_PIN_4,LOW);
-  digitalWrite(LED_PIN_5,LOW);
+  digitalWrite(LED_PIN_1, LOW);
   Serial.println("Pattern complete");
 }
-
-/*
-   Select a random LED to turn on
-   Print out the name of the color
-   in the Serial Monitor
-void random_led() {
-  // pick a pin number 9-13 because we have LEDs on those pins...
-  int random_led = random(9, 13);
-  
-  // generate our map of the random LED to the map of our array
-  int color_map = map(random_led, 9, 12, 0, 3);
-  Serial.print("Color is... ");
-  // Use the random array number to print out the color
-  Serial.println(led_colors[color_map]);
-
-  //turn the LED on, then off for 1/2 second
-  digitalWrite(random_led, HIGH);
-  delay(500);
-  digitalWrite(random_led, LOW);
-  delay(500);
-}
-*/
